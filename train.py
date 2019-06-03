@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 import pickle
 from dataset_util import create_datasets, Constants
-from model import Rosetta, train_on_batch, validate_on_batch, save_model
+from model import CRNN, train_on_batch, validate_on_batch, save_model
 from vis_util import write_to_tensorboard
 
 tf.enable_eager_execution()
@@ -28,7 +28,7 @@ def main(argv=None):
 	train_batches = int(np.floor(train_image_count/Constants.BATCH_SIZE))
 	val_batches = int(np.floor(val_image_count/Constants.BATCH_SIZE))
 
-	model = Rosetta(lenCharList)
+	model = CRNN(lenCharList)
 
 	global_step_op = tf.Variable(0)
 	starter_learning_rate = 0.1
