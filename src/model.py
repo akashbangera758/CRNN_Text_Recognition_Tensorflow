@@ -17,70 +17,66 @@ class CRNN(tf.keras.Model):
 	    super(CRNN, self).__init__()
 	    self.len_charList = len_charList
 	    # CNN Layer 1
-	    self.cnn1 = Convolution2D(filters=64, kernel_size=3, strides=1, padding='same', activation='relu')
-	    self.mx1 = MaxPooling2D(pool_size=(2,2), strides=2, padding='valid')
+	    self.conv1 = Convolution2D(filters=64, kernel_size=3, strides=1, padding='same', activation='relu')
+	    self.pool1 = MaxPooling2D(pool_size=(2,2), strides=2, padding='valid')
 	    # CNN Layer 2
-	    self.cnn2 = Convolution2D(filters=128, kernel_size=3, strides=1, padding='same', activation='relu')
-	    self.mx2 = MaxPooling2D(pool_size=(2,2), strides=2, padding='valid')
+	    self.conv2 = Convolution2D(filters=128, kernel_size=3, strides=1, padding='same', activation='relu')
+	    self.pool2 = MaxPooling2D(pool_size=(2,2), strides=2, padding='valid')
 	    # CNN Layer 3
-	    self.cnn3 = Convolution2D(filters=256, kernel_size=3, strides=1, padding='same', activation='relu', use_bias=False)
+	    self.conv3 = Convolution2D(filters=256, kernel_size=3, strides=1, padding='same', activation='relu', use_bias=False)
 	    # CNN Layer 4
-	    self.cnn4 = Convolution2D(filters=256, kernel_size=3, strides=1, padding='same', activation='relu', use_bias=False)
-	    self.mx4 = MaxPooling2D(pool_size=(1,2), strides=(1,2), padding='valid')
+	    self.conv4 = Convolution2D(filters=256, kernel_size=3, strides=1, padding='same', activation='relu', use_bias=False)
+	    self.pool4 = MaxPooling2D(pool_size=(1,2), strides=(1,2), padding='valid')
 	    # CNN Layer 5
-	    self.cnn5 = Convolution2D(filters=512, kernel_size=3, strides=1, padding='same', use_bias=False)
-	    self.bn5 = BatchNormalization(trainable=True, scale=True)
-	    self.ac5 = Activation(activation='relu')
+	    self.conv5 = Convolution2D(filters=512, kernel_size=3, strides=1, padding='same', use_bias=False)
+	    self.norm5 = BatchNormalization(trainable=True, scale=True)
+	    self.relu5 = Activation(activation='relu')
 	    # CNN Layer 6
-	    self.cnn6 = Convolution2D(filters=512, kernel_size=3, strides=1, padding='same', use_bias=False)
-	    self.bn6 = BatchNormalization(trainable=True, scale=True)
-	    self.ac6 = Activation(activation='relu')
-	    self.mx6 = MaxPooling2D(pool_size=(1,2), strides=(1,2), padding='valid')
+	    self.conv6 = Convolution2D(filters=512, kernel_size=3, strides=1, padding='same', use_bias=False)
+	    self.norm6 = BatchNormalization(trainable=True, scale=True)
+	    self.relu6 = Activation(activation='relu')
+	    self.pool6 = MaxPooling2D(pool_size=(1,2), strides=(1,2), padding='valid')
 	    # CNN Layer 7
-	    self.cnn7 = Convolution2D(filters=512, kernel_size=2, strides=(1,2), padding='same', activation='relu', use_bias=False)
+	    self.conv7 = Convolution2D(filters=512, kernel_size=2, strides=(1,2), padding='same', activation='relu', use_bias=False)
 	    # RNN Layer 1
 	    self.rnn1 = Bidirectional(layer=LSTM(units=256, unit_forget_bias=True, dropout=0.5, return_sequences=True), merge_mode='concat')
 	    # RNN Layer 2
 	    self.rnn2 = Bidirectional(layer=LSTM(units=256, unit_forget_bias=True, dropout=0.5, return_sequences=True), merge_mode='concat')
 	    # Atrous Layer
-	    self.atrous = Convolution2D(filters=self.len_charList+1, kernel_size=3, dilation_rate=(1,1), padding='same')
+	    self.atrous_conv = Convolution2D(filters=self.len_charList+1, kernel_size=3, dilation_rate=(1,1), padding='same')
 	    
 	def call(self, inputs):
-        inp = tf.cast(inputs, dtype=tf.float32)
+        inputs = tf.cast(inputs, dtype=tf.float32)
 	    
-        cnn1 = self.cnn1(inp)
-	    mx1 = self.mx1(cnn1)
+        conv1 = self.conv1(inputs)
+	    pool1 = self.pool1(conv1)
 
-	    cnn2 = self.cnn2(mx1)
-	    mx2 = self.mx2(cnn2)
+	    conv2 = self.conv2(pool1)
+	    pool2 = self.pool2(conv2)
 
-	    cnn3 = self.cnn3(mx2)
+	    conv3 = self.conv3(pool2)
 
-	    cnn4 = self.cnn4(cnn3)
-	    mx4 = self.mx4(cnn4)
+	    conv4 = self.conv4(conv3)
+	    pool4 = self.pool4(conv4)
 
-	    cnn5 = self.cnn5(mx4)
-	    bn5 = self.bn5(cnn5)
-	    ac5 = self.ac5(bn5)
+	    conv5 = self.conv5(pool4)
+	    norm5 = self.norm5(conv5)
+	    relu5 = self.relu5(norm5)
 
-	    cnn6 = self.cnn6(ac5)
-	    bn6 = self.bn6(cnn6)
-	    ac6 = self.ac6(bn6)
-	    mx6 = self.mx6(ac6)
+	    conv6 = self.conv6(relu5)
+	    norm6 = self.norm6(conv6)
+	    relu6 = self.relu6(norm6)
+	    pool6 = self.pool6(relu6)
 
-	    cnn7 = self.cnn7(mx6)
+	    conv7 = self.conv7(pool6)
+	    x = tf.squeeze(conv7, axis=[2])
 
-	    squeeze = tf.squeeze(cnn7, axis=[2])
-
-	    rnn1 = self.rnn1(squeeze)
-
+	    rnn1 = self.rnn1(x)
 	    rnn2 = self.rnn2(rnn1)
+	    x = tf.expand_dims(rnn2, axis=2)
 
-	    ed = tf.expand_dims(rnn2, axis=2)
-
-	    atrous = self.atrous(ed)
-
-	    x = tf.squeeze(atrous, axis=[2])
+	    atrous_conv = self.atrous_conv(x)
+	    x = tf.squeeze(atrous_conv, axis=[2])
 
 	    return x
 

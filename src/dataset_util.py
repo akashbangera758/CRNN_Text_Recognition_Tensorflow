@@ -11,13 +11,13 @@ from sklearn.model_selection import train_test_split
 from multiprocessing import Pool
 
 class Constants:
-    WORDS_FILE = "words.txt"
-    CHARLIST_FILE = "charList.txt"
-    TRAIN_TFRECORD = "train.tfrecords"
-    VAL_TFRECORDS = "val.tfrecords"
-    ACCURACY_FILE = "accuracy.txt"
-    MODEL_DIR = "saved_model/"
-    TENSORBOARD_DIR = "train/"
+    WORDS_FILE = "../data/words.txt"
+    CHARLIST_FILE = "../data/charList.txt"
+    TRAIN_TFRECORD = "../data/train.tfrecords"
+    VAL_TFRECORDS = "../data/val.tfrecords"
+    ACCURACY_FILE = "../model/accuracy.txt"
+    MODEL_DIR = "../model/saved_model/"
+    TENSORBOARD_DIR = "../model/train/"
     AUTOTUNE = tf.contrib.data.AUTOTUNE
     BATCH_SIZE = 50
     MAX_TEXT_LENGTH = 32

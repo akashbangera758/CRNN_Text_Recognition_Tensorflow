@@ -7,7 +7,7 @@ from dataset_util import Constants
 
 class tf_image:
     no_of_images = 10
-    height = 52
+    height = Constants.REQUIRED_HEIGHT + 20
     font = cv2.FONT_HERSHEY_SIMPLEX
     bottomLeftCornerOfText = (10,45)
     fontScale = 0.5

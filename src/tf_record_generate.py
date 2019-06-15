@@ -1,5 +1,5 @@
 # Author: Akash Bangera (2019)
-# tfrecords generation script for Rosetta
+# tfrecords generation script for CRNN
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ def image_example(image, label):
     '''
     Description: Create a dictionary with features that may be relevant.
     '''
-    try:  
+    try:
         image = cv2.imencode('.jpg', image)[1].tostring()
         label = str.encode(label)
 
